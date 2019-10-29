@@ -14,7 +14,7 @@ from envs.env import MountainCarEnvInherit
 from envs.goal import Goal
 
 
-n_eps = 20000
+n_eps = 200
 learning_rate = 3e-3
 n_steps = 500
 max_grad_norm = 0.5
@@ -25,7 +25,7 @@ update_epochs = 1
 e_decay = 0.002
 e_meta_decay = 0.02
 
-target_policy_update = 1
+target_policy_update = 5
 
 seed = 42
 
@@ -52,23 +52,21 @@ def main():
     env = MountainCarEnvInherit()
     env.seed(42)
 
-    meta_policy = Policy('dqn', env.observation_space.shape[0], goal_object.get_size()) 
-    target_meta_policy = Policy('dqn', env.observation_space.shape[0], goal_object.get_size()) 
-
-    policy = Policy('dqn', env.observation_space.shape[0] + goal_object.get_size(), env.action_space.n)
-    target_policy = Policy('dqn', env.observation_space.shape[0] + goal_object.get_size(), env.action_space.n)
+    meta_policy = Policy(env.observation_space.shape[0], goal_object.get_size()) 
+    target_meta_policy = Policy(env.observation_space.shape[0], goal_object.get_size()) 
+    policy = Policy(env.observation_space.shape[0] + goal_object.get_size(), env.action_space.n)
+    target_policy = Policy(env.observation_space.shape[0] + goal_object.get_size(), env.action_space.n)
 
     meta_policy.to(device)
     target_meta_policy.to(device)
-    target_meta_policy.load_state_dict(meta_policy.state_dict())
-
     policy.to(device)
     target_policy.to(device)
+
+    target_meta_policy.load_state_dict(meta_policy.state_dict())
     target_policy.load_state_dict(policy.state_dict())
 
-    optimizer_meta_policy = DQNOptimizer(meta_policy, target_meta_policy, mini_batch_size, discount, learning_rate, update_epochs)
-
-    optimizer_policy = DQNOptimizer(policy, target_policy, mini_batch_size, discount, learning_rate, update_epochs)
+    optimizer = Optimizer(meta_policy, target_meta_policy, policy, target_policy, mini_batch_size, discount, 
+                          learning_rate, update_epochs)
 
     episode_rewards = deque(maxlen=50)
 
@@ -140,8 +138,7 @@ def main():
         storage.compute()
         storage_meta.compute()
 
-        loss_meta = optimizer_meta_policy.update(storage_meta)
-        loss = optimizer_policy.update(storage)
+        loss_meta, loss = optimizer.update(storage_meta, storage)
 
         if eps % target_policy_update:
             target_meta_policy.load_state_dict(meta_policy.state_dict())

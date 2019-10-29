@@ -3,7 +3,7 @@ from .dqn.dqn import DQN
 
 
 class Policy(nn.Module):
-    def __init__(self, policy_name, obs_shape, action_space):
+    def __init__(self, obs_shape, action_space):
         super(Policy, self).__init__()
 
         self.policy = DQN(obs_shape, action_space)

@@ -5,10 +5,10 @@ import torch.nn.functional as F
 
 class Optimizer(object):
     def __init__(self,
-                 policy,
-                 target_policy,
                  meta_policy,
                  target_meta_policy,
+                 policy,
+                 target_policy,
                  mini_batch_size,
                  discount,
                  lr,
@@ -29,12 +29,12 @@ class Optimizer(object):
         self.optimizer = optim.Adam(self.policy.parameters(), lr=lr, eps=self.epsilon)
         self.optimizer_target = optim.Adam(self.meta_policy.parameters(), lr=lr, eps=self.epsilon)
 
-    def update(self, storage, meta_storage):
+    def update(self, meta_storage, storage):
 
         loss_meta = self._updata_meta_controller(meta_storage)
-        loss_policy = self._update_controller(storage)
+        loss = self._update_controller(storage)
 
-        return loss_meta, loss_policy
+        return loss_meta, loss
 
     def _updata_meta_controller(self, meta_storage):
 
