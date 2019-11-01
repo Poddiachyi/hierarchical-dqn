@@ -16,7 +16,7 @@ class Storage(object):
         mask = torch.FloatTensor([[0.0] if done else [1.0]]).to(self.device)
         action = action.unsqueeze(0).to(self.device)
         reward = torch.FloatTensor(np.array([reward])).unsqueeze(1).to(self.device)
-        state = state.unsqueeze(0)
+        state = state.unsqueeze(0).to(self.device)
         next_state = torch.FloatTensor(next_state).unsqueeze(0).to(self.device)
 
         self.states.append(state)

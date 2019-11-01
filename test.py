@@ -28,6 +28,8 @@ def main():
         env.render()
         obs, reward, done, info = env.step(int(action.item()))
         sum_reward += reward
+
+        print(obs)
         if done: 
             break
         i += 1

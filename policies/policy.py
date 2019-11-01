@@ -16,5 +16,5 @@ class Policy(nn.Module):
         return action
         
     def get_value(self, x):
-        value = self.policy(x)  # it's q value
-        return value
+        q_value = self.policy(x)
+        return q_value
